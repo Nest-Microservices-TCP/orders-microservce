@@ -9,6 +9,7 @@ datasource db {
 
 enum OrderStatus {
   PENDING
+  PAID
   DELIVERED
   CANCEL
 }
@@ -25,11 +26,14 @@ model Order {
   // de este campo que sera nulo hasta que se pague la orden
   paidAt DateTime?
 
+  stripeChargeId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Una orden tiene muchos OrderItems
   OrderItem OrderItem[]
+  OrderReceipt OrderReceipt? // Relacion 1:1
 }
 
 model OrderItem {
@@ -42,4 +46,17 @@ model OrderItem {
   // el orderId
   Order Order? @relation(fields: [orderId], references: [id])
   orderId String
+}
+
+model OrderReceipt {
+  id String @id @default(uuid())
+
+  // Relacion 1:1 con Order
+  order Order @relation(fields: [orderId], references: [id])
+  orderId String @unique
+
+  receiptUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

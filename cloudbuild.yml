@@ -1,0 +1,25 @@
+# Estos son los pasos que seguirá google cloud para la construcción
+# de la imagen del servicio de auth-ms. Los cuales básicamente son
+# la ejecución de los comandos de docker que construyen la imagen
+# a partir del dockerfile.prod y que la pushean hacia nuestro
+# registry en la nube
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      docker build -t northamerica-northeast1-docker.pkg.dev/microservices/image-cloud-registry/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
+  secretEnv: ['DATABASE_URL']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    [
+      'push',
+      'northamerica-northeast1-docker.pkg.dev/microservices/image-cloud-registry/orders-ms',
+    ]
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/367390259998/secrets/orders_database_url/versions/1
+    env: 'DATABASE_URL'
